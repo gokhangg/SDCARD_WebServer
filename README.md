@@ -11,6 +11,8 @@ Usage:
 -Then you will see your webpage.
 
 Under the "webpage" folder you can find an example webpage setting which includes a video and plays it on the web browser.
+Moreover, the program writes runtime details on the com port (115200bps) attached to the debugger on the board.
+So you can observe the traficking between your board and web browser.
 
-By the way if you like the western genre you can directly watch the video :)
+By the way, if you like the western genre you can directly watch the video inside the directory:)
 
