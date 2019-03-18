@@ -1,5 +1,5 @@
 This project is intended to be a starting point for those wanting to prepare a MCU based webserver which acquires web related files from an sdcard. For an easy compilation of the codes you can use Eclipse IDE after installation of ARM plugin and setting up the environment.
-In the project, FRD64 platform which encompasses anMK64FN1M0VLL12 CPU and FatFs and lwIP libraries were used. The libraries are modified to get a smooth connection between the file system manipulation layer (FatFs) and TCIP/HTTP layer (lwIP). A precompiled binary file which can be directly flashed to the MCU is also provided, so you can see how the program works without diving inside the coding. :)
+In the project, FRDM64 platform which encompasses anMK64FN1M0VLL12 CPU and FatFs and lwIP libraries were used. The libraries are modified to get a smooth connection between the file system manipulation layer (FatFs) and TCIP/HTTP layer (lwIP). A precompiled binary file which can be directly flashed to the MCU is also provided, so you can see how the program works without diving inside the coding. :)
 
 Usage:
 -Flash the binary to the MCU.
