@@ -358,8 +358,8 @@ const struct fsdata_file file__index_html[] = { { file__404_html,
 
 FIL fp; //This line was added later
 
-int fs_open_custom(struct fs_file *file, const char *name) {
-	unsigned char Buff[256];
+int fs_open_custom(struct fs_file *file, const char name[]) {
+	char Buff[256];
 
 	unsigned int Cnt;
 	FRESULT fr;

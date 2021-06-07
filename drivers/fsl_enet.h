@@ -418,8 +418,8 @@ typedef struct _enet_rx_bd_struct
     uint16_t reserved3;
     uint16_t reserved4;
 #endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
-} enet_rx_bd_struct_t;
 
+} enet_rx_bd_struct_t;
 /*! @brief Defines the enhanced transmit buffer descriptor structure for the little endian system. */
 typedef struct _enet_tx_bd_struct
 {

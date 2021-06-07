@@ -44,11 +44,17 @@
 
 #include "ff.h"
 
+#include "FreeRTOS.h"
+#include "task.h"
+
+
+#include "ethernet_.h"
+
 
 /*IP address*/
 #define IP_ADD0 192
 #define IP_ADD1 168
-#define IP_ADD2 1
+#define IP_ADD2 178
 #define IP_ADD3 250
 
 /*Netmask configuration*/
@@ -60,7 +66,7 @@
 /*Gateway address configuration*/
 #define GW_ADD0 192
 #define GW_ADD1 168
-#define GW_ADD2 1
+#define GW_ADD2 178
 #define GW_ADD3 249
 
 /*MAC address*/
@@ -68,8 +74,15 @@
 
 /*Filesystem object can be externed from other files*/
 FATFS fs;
+uint32_t var;
+
+err_t ethernetif1_init(struct netif *netif);
+
+#include <stdlib.h>
 
 int main(void) {
+
+	//uint8_t *ptr = pvPortMalloc( 4096 );
 
 	FRESULT res; /* API result code */
 	struct netif fsl_netif0;
@@ -91,6 +104,12 @@ int main(void) {
 	/*preparation of gateway address*/
 	IP4_ADDR(&fsl_netif0_gw, GW_ADD0, GW_ADD1, GW_ADD2,
 			GW_ADD3);
+
+	{
+
+
+	}
+
 
 	/*Initialize lwip stack*/
 	lwip_init();
@@ -122,9 +141,17 @@ int main(void) {
 			((u8_t *) &fsl_netif0_gw)[3]);
 	PRINTF("************************************************\r\n");
 
+
+
+
+
+
+	extern uint32_t __END_BSS;
+	var = &__END_BSS;
 	/*wait for connection and request*/
 	while (1) {
 		/* Poll the driver, get any outstanding frames */
+		//poll_driver(&fsl_netif0);
 		ethernetif_input(&fsl_netif0);
 
 		sys_check_timeouts(); /* Handle all system timeouts for all core protocols */
@@ -134,4 +161,8 @@ int main(void) {
 void SysTick_Handler(void) {
 	time_isr();
 }
+
+
+
+
 
