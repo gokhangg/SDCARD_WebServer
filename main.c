@@ -141,11 +141,6 @@ int main(void) {
 			((u8_t *) &fsl_netif0_gw)[3]);
 	PRINTF("************************************************\r\n");
 
-
-
-
-
-
 	extern uint32_t __END_BSS;
 	var = &__END_BSS;
 	/*wait for connection and request*/

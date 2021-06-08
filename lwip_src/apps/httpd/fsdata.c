@@ -360,6 +360,7 @@ FIL fp; //This line was added later
 
 int fs_open_custom(struct fs_file *file, const char name[]) {
 	char Buff[256];
+	//return 0;
 
 	unsigned int Cnt;
 	FRESULT fr;
