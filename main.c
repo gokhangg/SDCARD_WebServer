@@ -70,7 +70,7 @@
 #define GW_ADD3 249
 
 /*MAC address*/
-#define MAC_ADD {0x25, 0x25, 0x25, 0x25, 0x25, 0x25}
+unsigned char MAC_ADD[6] = {0x25, 0x25, 0x25, 0x25, 0x25, 0x25};
 
 /*Filesystem object can be externed from other files*/
 FATFS fs;
@@ -115,7 +115,7 @@ int main(void) {
 	lwip_init();
 	/*addition of active ethernet interface to the stack*/
 	netif_add(&fsl_netif0, &fsl_netif0_ipaddr, &fsl_netif0_netmask,
-			&fsl_netif0_gw, &fsl_enet_config0, ethernetif0_init,
+			&fsl_netif0_gw, MAC_ADD, ethernetif0_init,
 			ethernet_input);
 	/*Setting the created ethernet interface as default*/
 	netif_set_default(&fsl_netif0);

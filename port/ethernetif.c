@@ -65,19 +65,9 @@
 #include "lwip/def.h"
 #include "lwip/mem.h"
 #include "lwip/pbuf.h"
-#include "lwip/stats.h"
 #include "lwip/snmp.h"
 #include "lwip/ethip6.h"
 #include "netif/etharp.h"
-#include "netif/ppp/pppoe.h"
-#include "lwip/igmp.h"
-#include "lwip/mld6.h"
-
-
-#include "ethernetif.h"
-
-#include "fsl_enet.h"
-#include "fsl_phy.h"
 
 #include <stdlib.h>
 
@@ -93,6 +83,28 @@
 EnetOperations operations;
 EthernetIo ethernet_io;
 
+#define ENET_FRAME_MAX_FRAMELEN 1518U /*!< Default maximum Ethernet frame size. */
+
+#define ENET_OK             (0U)
+#define ENET_ERROR          (0xFFU)
+#define ENET_TIMEOUT        (0xFFFU)
+
+enum _enet_status
+{
+    kStatus_ENET_RxFrameError = MAKE_STATUS(kStatusGroup_ENET, 0U),   /*!< A frame received but data error happen. */
+    kStatus_ENET_RxFrameFail = MAKE_STATUS(kStatusGroup_ENET, 1U),    /*!< Failed to receive a frame. */
+    kStatus_ENET_RxFrameEmpty = MAKE_STATUS(kStatusGroup_ENET, 2U),   /*!< No frame arrive. */
+    kStatus_ENET_TxFrameOverLen = MAKE_STATUS(kStatusGroup_ENET, 3U), /*!< Tx frame over length. */
+    kStatus_ENET_TxFrameBusy = MAKE_STATUS(kStatusGroup_ENET, 4U),    /*!< Tx buffer descriptors are under process. */
+    kStatus_ENET_TxFrameFail = MAKE_STATUS(kStatusGroup_ENET, 5U)     /*!< Transmit frame fail. */
+#ifdef ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
+    ,
+    kStatus_ENET_PtpTsRingFull = MAKE_STATUS(kStatusGroup_ENET, 6U), /*!< Timestamp ring full. */
+    kStatus_ENET_PtpTsRingEmpty = MAKE_STATUS(kStatusGroup_ENET, 7U) /*!< Timestamp ring empty. */
+#endif                                                               /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
+};
+
+#define ENET_ATONEGOTIATION_TIMEOUT     (0xFFFU)
 
 /**
  * This function should do the actual transmission of the packet. The packet is
@@ -330,7 +342,7 @@ netif->flags |= NETIF_FLAG_MLD6;
 netif->hwaddr_len = ETH_HWADDR_LEN;
 
 /* set MAC hardware address */
-memcpy(netif->hwaddr, ((ethernetif_config_t*)netif->state)->macAddress, NETIF_MAX_HWADDR_LEN);
+memcpy(netif->hwaddr, netif->state, NETIF_MAX_HWADDR_LEN);
 
 /* maximum transfer unit */
 netif->mtu = 1500; /* TODO: define a config */

@@ -278,7 +278,7 @@
  *    Called to free resources allocated by fs_open_custom().
  */
 #if !defined LWIP_HTTPD_CUSTOM_FILES || defined __DOXYGEN__
-#define LWIP_HTTPD_CUSTOM_FILES       1
+#define LWIP_HTTPD_CUSTOM_FILES       0
 #endif
 
 /** Set this to 1 to support fs_read() to dynamically read file data.

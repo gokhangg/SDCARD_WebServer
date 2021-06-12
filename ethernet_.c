@@ -1,6 +1,6 @@
 #include "ethernet_.h"
 
-#define NETIF_MAX_HWADDR_LEN 6
+
 #include "stdbool.h"
 
 #include "lwip/opt.h"
@@ -96,55 +96,9 @@ int InitEthernet(const EthernetMemIo* mem_io, EthernetIo* ethernet_io, EnetSetti
 	config.miiSpeed = (enet_mii_speed_t)settings->link_status.speed;
 	config.miiDuplex = (enet_mii_duplex_t)settings->link_status.duplex;
 
-
-	#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-	    uint32_t instance;
-	    static ENET_Type *const enetBases[] = ENET_BASE_PTRS;
-	    static const IRQn_Type enetTxIrqId[] = ENET_Transmit_IRQS;
-	    /*! @brief Pointers to enet receive IRQ number for each instance. */
-	    static const IRQn_Type enetRxIrqId[] = ENET_Receive_IRQS;
-	#if defined(ENET_ENHANCEDBUFFERDESCRIPTOR_MODE) && ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
-	    /*! @brief Pointers to enet timestamp IRQ number for each instance. */
-	    static const IRQn_Type enetTsIrqId[] = ENET_1588_Timer_IRQS;
-	#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
-
-	    /* Create the Event for transmit busy release trigger. */
-	    ethernetif->enetTransmitAccessEvent = xEventGroupCreate();
-	    ethernetif->txFlag = 0x1;
-
-	    config.interrupt |= kENET_RxFrameInterrupt | kENET_TxFrameInterrupt | kENET_TxBufferInterrupt;
-
-	    for (instance = 0; instance < ARRAY_SIZE(enetBases); instance++)
-	    {
-	        if (enetBases[instance] == ethernetif->base)
-	        {
-	#ifdef __CA7_REV
-	            GIC_SetPriority(enetRxIrqId[instance], ENET_PRIORITY);
-	            GIC_SetPriority(enetTxIrqId[instance], ENET_PRIORITY);
-	#if defined(ENET_ENHANCEDBUFFERDESCRIPTOR_MODE) && ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
-	            GIC_SetPriority(enetTsIrqId[instance], ENET_1588_PRIORITY);
-	#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
-	#else
-	            NVIC_SetPriority(enetRxIrqId[instance], ENET_PRIORITY);
-	            NVIC_SetPriority(enetTxIrqId[instance], ENET_PRIORITY);
-	#if defined(ENET_ENHANCEDBUFFERDESCRIPTOR_MODE) && ENET_ENHANCEDBUFFERDESCRIPTOR_MODE
-	            NVIC_SetPriority(enetTsIrqId[instance], ENET_1588_PRIORITY);
-	#endif /* ENET_ENHANCEDBUFFERDESCRIPTOR_MODE */
-	#endif /* __CA7_REV */
-	            break;
-	        }
-	    }
-
-	    LWIP_ASSERT("Input Ethernet base error!", (instance != ARRAY_SIZE(enetBases)));
-	#endif /* USE_RTOS */
-
 	    uint32_t sysClock = CLOCK_GetFreq(kCLOCK_CoreSysClk);
 	    /* Initialize the ENET module.*/
 	    ENET_Init(ENET, &enet_handle, &config, &buffCfg[0], settings->mac, sysClock);
-
-	#if USE_RTOS && defined(FSL_RTOS_FREE_RTOS)
-	    ENET_SetCallback(&ethernetif->handle, ethernet_callback, netif);
-	#endif
 
 	    ENET_ActiveRead(ENET);
 	   return 0;

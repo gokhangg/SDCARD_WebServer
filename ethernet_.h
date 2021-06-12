@@ -2,6 +2,7 @@
 #include "stddef.h"
 #include "stdint.h"
 
+#define NETIF_MAX_HWADDR_LEN 6
 
 
 typedef struct {
