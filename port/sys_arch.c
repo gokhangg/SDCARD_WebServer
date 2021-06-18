@@ -29,7 +29,7 @@
  * Author: Adam Dunkels <adam@sics.se>
  *
  */
- 
+
 /*
  * Copyright (c) 2013-2016, Freescale Semiconductor, Inc.
  * Copyright 2016 NXP
@@ -66,9 +66,8 @@
 // Include OS functionality.
 //
 //*****************************************************************************
-
 /* ------------------------ System architecture includes ----------------------------- */
-#include "arch/sys_arch.h"
+#include "arch/sys_arch_.h"
 
 /* ------------------------ lwIP includes --------------------------------- */
 #include "lwip/opt.h"
@@ -91,29 +90,27 @@ int errno = 0;
 /*
  * Prints an assertion messages and aborts execution.
  */
-void sys_assert( char *pcMessage )
-{
+void sys_assert(char *pcMessage) {
 //FSL:only needed for debugging
 #ifdef LWIP_DEBUG
-    PRINTF(pcMessage);
-    PRINTF("\n\r");
+    //PRINTF(pcMessage);
+    //PRINTF("\n\r");
 #endif
 #if !NO_SYS
     portENTER_CRITICAL();
 #endif
-    for (;;)
-    {}
+    for (;;) {
+    }
 }
 
 /************************************************************************
-* Generates a pseudo-random number.
-* NOTE: Contrubuted by the FNET project.
-*************************************************************************/
-static  u32_t _rand_value;
-u32_t lwip_rand(void)
-{
+ * Generates a pseudo-random number.
+ * NOTE: Contrubuted by the FNET project.
+ *************************************************************************/
+static u32_t _rand_value;
+u32_t lwip_rand(void) {
     _rand_value = _rand_value * 1103515245u + 12345u;
-	return((u32_t)(_rand_value>>16u) % (32767u + 1u));
+    return ((u32_t) (_rand_value >> 16u) % (32767u + 1u));
 }
 
 #if !NO_SYS
@@ -129,7 +126,7 @@ u32_t lwip_rand(void)
  *---------------------------------------------------------------------------*/
 err_t sys_mbox_new( sys_mbox_t *pxMailBox, int iSize )
 {
-err_t xReturn = ERR_MEM;
+    err_t xReturn = ERR_MEM;
     *pxMailBox = xQueueCreate( iSize, sizeof( void * ) );
     if( *pxMailBox != NULL )
     {
@@ -138,7 +135,6 @@ err_t xReturn = ERR_MEM;
     }
     return xReturn;
 }
-
 
 /*---------------------------------------------------------------------------*
  * Routine:  sys_mbox_free
@@ -154,12 +150,12 @@ err_t xReturn = ERR_MEM;
  *---------------------------------------------------------------------------*/
 void sys_mbox_free( sys_mbox_t *pxMailBox )
 {
-unsigned long ulMessagesWaiting;
+    unsigned long ulMessagesWaiting;
 
     ulMessagesWaiting = uxQueueMessagesWaiting( *pxMailBox );
     configASSERT( ( ulMessagesWaiting == 0 ) );
 
-    #if SYS_STATS
+#if SYS_STATS
     {
         if( ulMessagesWaiting != 0UL )
         {
@@ -168,7 +164,7 @@ unsigned long ulMessagesWaiting;
 
         SYS_STATS_DEC( mbox.used );
     }
-    #endif /* SYS_STATS */
+#endif /* SYS_STATS */
 
     vQueueDelete( *pxMailBox );
 }
@@ -270,9 +266,9 @@ err_t sys_mbox_trypost( sys_mbox_t *pxMailBox, void *pxMessageToPost )
  *---------------------------------------------------------------------------*/
 u32_t sys_arch_mbox_fetch( sys_mbox_t *pxMailBox, void **ppvBuffer, u32_t ulTimeOut )
 {
-void *pvDummy;
-TickType_t xStartTime, xEndTime, xElapsed;
-unsigned long ulReturn;
+    void *pvDummy;
+    TickType_t xStartTime, xEndTime, xElapsed;
+    unsigned long ulReturn;
 
     xStartTime = xTaskGetTickCount();
 
@@ -330,8 +326,8 @@ unsigned long ulReturn;
  *---------------------------------------------------------------------------*/
 u32_t sys_arch_mbox_tryfetch( sys_mbox_t *pxMailBox, void **ppvBuffer )
 {
-void *pvDummy;
-unsigned long ulReturn;
+    void *pvDummy;
+    unsigned long ulReturn;
 
     if( ppvBuffer== NULL )
     {
@@ -365,7 +361,7 @@ unsigned long ulReturn;
  *---------------------------------------------------------------------------*/
 err_t sys_sem_new( sys_sem_t *pxSemaphore, u8_t ucCount )
 {
-err_t xReturn = ERR_MEM;
+    err_t xReturn = ERR_MEM;
 
     vSemaphoreCreateBinary( ( *pxSemaphore ) );
 
@@ -412,8 +408,8 @@ err_t xReturn = ERR_MEM;
  *---------------------------------------------------------------------------*/
 u32_t sys_arch_sem_wait( sys_sem_t *pxSemaphore, u32_t ulTimeout )
 {
-TickType_t xStartTime, xEndTime, xElapsed;
-unsigned long ulReturn;
+    TickType_t xStartTime, xEndTime, xElapsed;
+    unsigned long ulReturn;
 
     xStartTime = xTaskGetTickCount();
 
@@ -452,7 +448,7 @@ unsigned long ulReturn;
  * @return a new mutex */
 err_t sys_mutex_new( sys_mutex_t *pxMutex )
 {
-err_t xReturn = ERR_MEM;
+    err_t xReturn = ERR_MEM;
 
     *pxMutex = xSemaphoreCreateMutex();
 
@@ -483,7 +479,6 @@ void sys_mutex_unlock(sys_mutex_t *pxMutex )
     xSemaphoreGive( *pxMutex );
 }
 
-
 /** Delete a semaphore
  * @param mutex the mutex to delete */
 void sys_mutex_free( sys_mutex_t *pxMutex )
@@ -491,7 +486,6 @@ void sys_mutex_free( sys_mutex_t *pxMutex )
     SYS_STATS_DEC( mutex.used );
     vQueueDelete( *pxMutex );
 }
-
 
 /*---------------------------------------------------------------------------*
  * Routine:  sys_sem_signal
@@ -555,9 +549,9 @@ u32_t sys_now(void)
  *---------------------------------------------------------------------------*/
 sys_thread_t sys_thread_new( const char *pcName, void( *pxThread )( void *pvParameters ), void *pvArg, int iStackSize, int iPriority )
 {
-TaskHandle_t xCreatedTask;
-portBASE_TYPE xResult;
-sys_thread_t xReturn;
+    TaskHandle_t xCreatedTask;
+    portBASE_TYPE xResult;
+    sys_thread_t xReturn;
 
     xResult = xTaskCreate( pxThread, pcName, iStackSize, pvArg, iPriority, &xCreatedTask );
 
@@ -638,42 +632,37 @@ void sys_arch_unprotect( sys_prot_t xValue )
     }
 }
 
-
 #else /* Bare-metal */
 
 static volatile uint32_t time_now = 0;
 
-void time_isr(void)
-{
+void time_isr(void) {
 #ifdef __CA7_REV
     SystemClearSystickFlag();
 #endif
-  time_now++;
+    time_now++;
 }
 
-void time_init(void)
-{
+void time_init(void) {
 #ifdef __CA7_REV
     /* special for i.mx6ul */
     SystemSetupSystick(1000U, (void *)time_isr, 0U);
     SystemClearSystickFlag();
 #else
     /* Set SysTick period to 1 ms and enable its interrupts */
-    SysTick_Config(USEC_TO_COUNT(1000U, sourceClock));
+    //SysTick_Config(USEC_TO_COUNT(1000U, sourceClock));
 #endif
 }
 
-
 /*
-This optional function returns the current time in milliseconds (don't care
-  for wraparound, this is only used for time diffs).
-  Not implementing this function means you cannot use some modules (e.g. TCP
-  timestamps, internal timeouts for NO_SYS==1).
-  */
+ This optional function returns the current time in milliseconds (don't care
+ for wraparound, this is only used for time diffs).
+ Not implementing this function means you cannot use some modules (e.g. TCP
+ timestamps, internal timeouts for NO_SYS==1).
+ */
 
-u32_t sys_now(void)
-{
-    return (u32_t)time_now;
+u32_t sys_now(void) {
+    return (u32_t) time_now;
 }
 
 /*---------------------------------------------------------------------------*
@@ -695,13 +684,11 @@ u32_t sys_now(void)
  * Outputs:
  *      sys_prot_t              -- Previous protection level (not used here)
  *---------------------------------------------------------------------------*/
-sys_prot_t sys_arch_protect( void )
-{
+sys_prot_t sys_arch_protect(void) {
     sys_prot_t result;
 
-    result = (sys_prot_t)DisableGlobalIRQ();
-
-    return result;
+      __asm volatile ("MRS %0, primask" : "=r" (result) );
+      return(result);
 }
 
 /*---------------------------------------------------------------------------*
@@ -715,9 +702,8 @@ sys_prot_t sys_arch_protect( void )
  * Inputs:
  *      sys_prot_t              -- Previous protection level (not used here)
  *---------------------------------------------------------------------------*/
-void sys_arch_unprotect( sys_prot_t xValue )
-{
-    EnableGlobalIRQ((uint32_t)xValue);
+void sys_arch_unprotect(sys_prot_t xValue) {
+    __asm volatile ("MSR primask, %0" : : "r" (xValue) : "memory");
 }
 
 #endif /*NO_SYS*/

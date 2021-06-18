@@ -122,10 +122,10 @@ typedef u32_t          mem_ptr_t;
 #define PACK_STRUCT_FIELD(x) x
 
 // Platform specific diagnostic output
-#include "sys_arch.h"//FSL
+#include "sys_arch_.h"//FSL
 
 // non-fatal, print a message.
-#define LWIP_PLATFORM_DIAG(x)                     do {PRINTF x;PRINTF("\r\n");} while(0)
+//#define LWIP_PLATFORM_DIAG(x)                     do {PRINTF x;PRINTF("\r\n");} while(0)
 // fatal, print message and abandon execution.
 #define LWIP_PLATFORM_ASSERT(x)                   sys_assert( x )
 

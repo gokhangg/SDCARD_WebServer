@@ -1,6 +1,7 @@
 #include "lwip/apps/fs.h"
 #include "lwip/def.h"
 #include "fsdata.h"
+#include "string.h"
 
 #define file_NULL (struct fsdata_file *) NULL
 
@@ -364,16 +365,12 @@ int fs_open_custom(struct fs_file *file, const char name[]) {
 
 	unsigned int Cnt;
 	FRESULT fr;
-	PRINTF("Requested File: \"");
-	PRINTF(name);
-	PRINTF("\".\n\r");
 	const struct fsdata_file *f;
 	Buff[0] = 0;
 	strcpy(Buff, "2:/webpage");
 	strcat(Buff, name);
 	fr = f_open(&fp, Buff, FA_READ);
 	if (fr == FR_OK) {
-		PRINTF("The file is present with size %d.\n\r", fp.obj.objsize);
 		file->len = fp.obj.objsize;
 		file->index = 0;
 		file->pextension = NULL;
@@ -382,14 +379,12 @@ int fs_open_custom(struct fs_file *file, const char name[]) {
 	}
 	else
 	{
-		PRINTF("Requested file not found.\n\r\n\r");
 	}
 	return 0;
 }
 
 void fs_close_custom(struct fs_file *file) {
-	if(f_close(&fp)==FR_OK)
-		PRINTF("Requested file closed.\n\r\n\r");
+	if(f_close(&fp)==FR_OK);
 }
 
 int fs_read_custom(struct fs_file *file, char *buffer, int count) {

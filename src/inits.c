@@ -30,7 +30,7 @@ int initSDCARD(void) {
 
 	/* SD host init function */
 	if (SD_HostInit(card) != kStatus_Success) {
-		PRINTF("\r\nSD host init fail\r\n");
+
 		return -1;
 	}
 
@@ -39,25 +39,23 @@ int initSDCARD(void) {
 
 	if (SD_WaitCardDetectStatus(SD_HOST_BASEADDR, &s_sdCardDetect, true)
 			== kStatus_Success) {
-		PRINTF("\r\nCard inserted.\r\n");
+
 		/* reset host once card re-plug in */
 		SD_HostReset(&(card->host));
 		/* power on the card */
 		SD_PowerOnCard(card->host.base, card->usrParam.pwr);
 	} else {
-		PRINTF("\r\nCard detect fail.\r\n");
+
 		return -1;
 	}
 	/* Init card. */
 	if (SD_CardInit(card)) {
-		PRINTF("\r\nSD card init failed.\r\n");
 		return -1;
 	}
 	/* Check if card is readonly. */
 	isReadOnly = SD_CheckReadOnly(card);
 
 	//SDHC_GetCapability(card->host.base, &capability);
-	PRINTF("\r\nCard capacity %d*%d bytes\r\n", card->blockCount,card->blockSize);
 }
 
 void initPeripherals(void) {

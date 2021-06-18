@@ -9,7 +9,6 @@
 
 #ifndef SRC_INITS_H_
 #define SRC_INITS_H_
-#include "fsl_debug_console.h"
 #include "board.h"
 #include "fsl_sd.h"
 #include "fsl_sysmpu.h"
