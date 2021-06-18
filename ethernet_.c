@@ -45,14 +45,7 @@ int SendTxFrame(uint8_t* data, uint32_t size) {
     return ENET_SendFrame(ENET, &enet_handle, data, size);
 }
 
-int InitEthernet(const EthernetMemIo* mem_io, EnetSettings* settings,
-        EthernetIo* ethernet_io) {
-    ethernet_io->get_rx_frame_size = GetRxFrameSize;
-    ethernet_io->read_rx_frame = ReadRxFrame;
-    ethernet_io->send_tx_frame = SendTxFrame;
-    ethernet_io->set_pull_tx_frame_function = NULL;
-    ethernet_io->set_push_rx_frame_function = NULL;
-    ethernet_io->max_frame_size = ENET_FRAME_MAX_FRAMELEN;
+int InitEthernet(const EthernetMemIo* mem_io, EnetSettings* settings) {
 
     ethernet_mem_io = *mem_io;
     size_t buffer_size = GET_ALIGNED(kMaxFrameSize * kRxBufferCount,
@@ -127,8 +120,15 @@ LinkStatus GetLinkStatus(const uint32_t phy_address) {
     return status;
 }
 
-int GetEnetOperations(EnetOperations* operations) {
-    operations->init_phy = InitPhy;
-    operations->get_link_status = GetLinkStatus;
-    operations->init_ethernet = InitEthernet;
+static const unsigned char MAC_ADD[6] = { 0x25, 0x25, 0x25, 0x25, 0x25, 0x25 };
+const EnetOperations* GetEnetOperations() {
+    static const EnetOperations ops = {.init_phy = InitPhy, .get_link_status = GetLinkStatus, .init_ethernet = InitEthernet,
+    .enet_io = {.get_rx_frame_size = GetRxFrameSize,
+    .read_rx_frame = ReadRxFrame,
+    .send_tx_frame = SendTxFrame,
+    .set_pull_tx_frame_function = NULL,
+    .set_push_rx_frame_function = NULL,
+    .max_frame_size = ENET_FRAME_MAX_FRAMELEN,
+    .mac = MAC_ADD}};
+    return &ops;
 }

@@ -33,26 +33,23 @@
  * Author: ghngunay@gmail.com
  */
 
-#include <stdio.h>
-#include "inits.h"
 
+#include "inits.h"
 
 #include "ff.h"
 
-#include "ethernet_.h"
+#include "ethernetif.h"
 
-void InitLwip();
-void LwipLoop();
+
 
 /*Filesystem object can be externed from other files*/
 FATFS fs;
 uint32_t var;
 
-
+#include <stdio.h>
 #include <stdlib.h>
 
-
-
+const EnetOperations* InitEnet();
 
 int main(void) {
 
@@ -63,13 +60,37 @@ int main(void) {
     res = f_mount(&fs, "2:", 1);
     /*Initialize systick timer*/
     time_init();
-
-    InitLwip();
+    const EnetOperations* operations = InitEnet();
+    InitLwip(&operations->enet_io);
 
     while (1) {
         /* Poll the driver, get any outstanding frames */
         LwipLoop();
     }
+}
+
+#define ENET_AUTONEGOTIATION_TIMEOUT     (0xFFFU)
+
+const EnetOperations* InitEnet() {
+    /*MAC address*/
+    const EnetOperations* operations = GetEnetOperations();
+    /* ENET driver initialization.*/
+    if (kEnetStatusOk != operations->init_phy(0)) {
+    }
+    volatile uint32_t count = 0;
+    LinkStatus link_status;
+    EnetSettings enet_settings;
+    enet_settings.mac = operations->enet_io.mac;
+    enet_settings.link_status.__status = 0;
+    while ((count < ENET_AUTONEGOTIATION_TIMEOUT)
+            && (!enet_settings.link_status.linked)) {
+        enet_settings.link_status = operations->get_link_status(0);
+        count++;
+    }
+
+    EthernetMemIo ethernet_memio = { malloc, free };
+    operations->init_ethernet(&ethernet_memio, &enet_settings);
+    return operations;
 }
 
 void SysTick_Handler(void) {

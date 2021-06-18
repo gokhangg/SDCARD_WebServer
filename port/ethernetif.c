@@ -1,6 +1,4 @@
 
-#include "ethernet_.h"
-
 #include "lwip/init.h"
 #include "lwip/opt.h"
 #include "lwip/def.h"
@@ -11,6 +9,9 @@
 #include "netif/etharp.h"
 #include "lwip/apps/httpd.h"
 #include "lwip/timeouts.h"
+
+#include "ethernetif.h"
+
 #include <stdlib.h>
 #include "string.h"
 
@@ -21,8 +22,8 @@
 #define IFNAME0 'e'
 #define IFNAME1 'n'
 
-EnetOperations operations;
-EthernetIo ethernet_io;
+
+static const EthernetIo* enet_io;
 
 
 #define ENET_OK             (0U)
@@ -71,7 +72,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p) {
         pucBuffer = (unsigned char *) p->payload;
     } else {
         /* pbuf chain, copy into contiguous ucBuffer. */
-        if (p->tot_len >= ethernet_io.max_frame_size) {
+        if (p->tot_len >= enet_io->max_frame_size) {
             return ERR_BUF;
         } else {
             pucChar = pucBuffer;
@@ -91,7 +92,7 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p) {
     /* Send frame. */
     result = ERR_TIMEOUT;
     for (counter = ENET_TIMEOUT; counter != 0U; counter--) {
-        if (ethernet_io.send_tx_frame(pucBuffer, p->tot_len)
+        if (enet_io->send_tx_frame(pucBuffer, p->tot_len)
                 != kEnetStatusTxFrameBusy) {
             result = ERR_OK;
             break;
@@ -130,7 +131,7 @@ static struct pbuf *low_level_input(struct netif * bb) {
     EnetStatusE status;
     /* Obtain the size of the packet and put it into the "len"
      variable. */
-    status = ethernet_io.get_rx_frame_size(&len);
+    status = enet_io->get_rx_frame_size(&len);
     if (kEnetStatusRxFrameEmpty != status) {
         /* Call enet_read_frame when there is a received frame. */
         if (len != 0) {
@@ -147,13 +148,13 @@ static struct pbuf *low_level_input(struct netif * bb) {
 #endif
                 if (p->next == 0) /* One-chain buffer.*/
                 {
-                    ethernet_io.read_rx_frame(p->payload, p->len);
+                    enet_io->read_rx_frame(p->payload, p->len);
                 } else /* Multi-chain buffer.*/
                 {
                     uint8_t data_tmp[1600];
                     uint32_t data_tmp_len = 0;
 
-                    ethernet_io.read_rx_frame(data_tmp, p->tot_len);
+                    enet_io->read_rx_frame(data_tmp, p->tot_len);
 
                     /* We iterate over the pbuf chain until we have read the entire
                      * packet into the pbuf. */
@@ -180,13 +181,13 @@ static struct pbuf *low_level_input(struct netif * bb) {
 
             } else {
                 /* drop packet*/
-                ethernet_io.read_rx_frame(NULL, 0U);
+                enet_io->read_rx_frame(NULL, 0U);
             }
         } else {
             /* Update the received buffer when error happened. */
             if (status == kEnetStatusRxFrameError) {
                 /* Update the receive buffer. */
-                ethernet_io.read_rx_frame(NULL, 0U);
+                enet_io->read_rx_frame(NULL, 0U);
             }
         }
     }
@@ -231,7 +232,7 @@ void ethernetif_input(struct netif *netif) {
  *         any other err_t on error
  */
 err_t ethernetif0_init(struct netif *netif) {
-    GetEnetOperations(&operations);
+
 
 #if LWIP_NETIF_HOSTNAME
     /* Initialize interface hostname */
@@ -265,7 +266,7 @@ err_t ethernetif0_init(struct netif *netif) {
     netif->hwaddr_len = ETH_HWADDR_LEN;
 
     /* set MAC hardware address */
-    memcpy(netif->hwaddr, netif->state, NETIF_MAX_HWADDR_LEN);
+    memcpy(netif->hwaddr, netif->state, netif->hwaddr_len);
 
     /* maximum transfer unit */
     netif->mtu = 1500; /* TODO: define a config */
@@ -275,24 +276,6 @@ err_t ethernetif0_init(struct netif *netif) {
     netif->flags |= NETIF_FLAG_BROADCAST | NETIF_FLAG_ETHARP
             | NETIF_FLAG_LINK_UP;
 
-    /* ENET driver initialization.*/
-    if (kEnetStatusOk != operations.init_phy(0)) {
-        LWIP_ASSERT("\r\nCannot initialize PHY.\r\n", 0);
-    }
-
-    volatile uint32_t count = 0;
-    LinkStatus link_status;
-    EnetSettings enet_settings;
-    enet_settings.mac = netif->hwaddr;
-    enet_settings.link_status.__status = 0;
-    while ((count < ENET_ATONEGOTIATION_TIMEOUT)
-            && (!enet_settings.link_status.linked)) {
-        enet_settings.link_status = operations.get_link_status(0);
-        count++;
-    }
-
-    EthernetMemIo ethernet_memio = { malloc, free };
-    operations.init_ethernet(&ethernet_memio, &enet_settings, &ethernet_io);
 
 #if LWIP_IPV6 && LWIP_IPV6_MLD
     /*
@@ -329,12 +312,13 @@ err_t ethernetif0_init(struct netif *netif) {
 #define GW_ADD2 178
 #define GW_ADD3 249
 
-/*MAC address*/
-unsigned char MAC_ADD[6] = { 0x25, 0x25, 0x25, 0x25, 0x25, 0x25 };
+
 
 static struct netif netif0;
 
-void InitLwip() {
+void InitLwip(const EthernetIo* enet_io_) {
+
+    enet_io = enet_io_;
 
     ip4_addr_t fsl_netif0_ipaddr, fsl_netif0_netmask, fsl_netif0_gw;
 
@@ -349,7 +333,7 @@ void InitLwip() {
     lwip_init();
     /*addition of active ethernet interface to the stack*/
     netif_add(&netif0, &fsl_netif0_ipaddr, &fsl_netif0_netmask, &fsl_netif0_gw,
-            MAC_ADD, ethernetif0_init, ethernet_input);
+            (void*)enet_io->mac, ethernetif0_init, ethernet_input);
     /*Setting the created ethernet interface as default*/
     netif_set_default(&netif0);
     /*Seeting up the interface*/
