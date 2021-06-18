@@ -688,6 +688,7 @@ sys_prot_t sys_arch_protect(void) {
     sys_prot_t result;
 
       __asm volatile ("MRS %0, primask" : "=r" (result) );
+      __asm volatile ("cpsid i" : : : "memory");
       return(result);
 }
 

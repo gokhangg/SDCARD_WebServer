@@ -91,7 +91,7 @@ int InitEthernet(const EthernetMemIo* mem_io, EnetSettings* settings) {
 
     uint32_t sysClock = CLOCK_GetFreq(kCLOCK_CoreSysClk);
     /* Initialize the ENET module.*/
-    ENET_Init(ENET, &enet_handle, &config, &buffCfg[0], settings->mac,
+    ENET_Init(ENET, &enet_handle, &config, &buffCfg[0], (uint8_t*)settings->mac,
             sysClock);
 
     ENET_ActiveRead(ENET);
