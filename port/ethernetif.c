@@ -116,6 +116,10 @@ static err_t low_level_output(struct netif *netif, struct pbuf *p) {
     return result;
 }
 
+
+
+
+
 /**
  * Should allocate a pbuf and transfer the bytes of the incoming
  * packet from the interface into the pbuf.
@@ -297,8 +301,8 @@ err_t ethernetif0_init(struct netif *netif) {
 /*IP address*/
 #define IP_ADD0 192
 #define IP_ADD1 168
-#define IP_ADD2 178
-#define IP_ADD3 250
+#define IP_ADD2 2
+#define IP_ADD3 231
 
 /*Netmask configuration*/
 #define NET_MSK0 255

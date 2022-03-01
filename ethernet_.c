@@ -23,6 +23,12 @@ EthernetMemIo ethernet_mem_io;
 uint8_t* rx_buff;
 uint8_t* tx_buff;
 
+static void EnetIrqCallback(ENET_Type *base, enet_handle_t *handle, enet_event_t event, void *userData){
+	if (event == kENET_RxEvent){
+		LwipLoop();
+	}
+}
+
 EnetStatusE GetRxFrameSize(uint32_t* size) {
     status_t status = ENET_GetRxFrameSize(&enet_handle, size);
     switch (status) {
@@ -88,12 +94,13 @@ int InitEthernet(const EthernetMemIo* mem_io, EnetSettings* settings) {
     config.ringNum = ENET_RING_NUM;
     config.miiSpeed = (enet_mii_speed_t) settings->link_status.speed;
     config.miiDuplex = (enet_mii_duplex_t) settings->link_status.duplex;
-
+    config.interrupt = ENET_RX_INTERRUPT;
     uint32_t sysClock = CLOCK_GetFreq(kCLOCK_CoreSysClk);
     /* Initialize the ENET module.*/
+
     ENET_Init(ENET, &enet_handle, &config, &buffCfg[0], (uint8_t*)settings->mac,
             sysClock);
-
+    enet_handle.callback = EnetIrqCallback;
     ENET_ActiveRead(ENET);
     return 0;
 }
@@ -126,8 +133,8 @@ const EnetOperations* GetEnetOperations() {
     .enet_io = {.get_rx_frame_size = GetRxFrameSize,
     .read_rx_frame = ReadRxFrame,
     .send_tx_frame = SendTxFrame,
-    .set_pull_tx_frame_function = NULL,
-    .set_push_rx_frame_function = NULL,
+    .register_tx_irq_cb = NULL,
+    .register_rx_irq_cb = NULL,
     .max_frame_size = ENET_FRAME_MAX_FRAMELEN,
     .mac = MAC_ADD}};
     return &ops;

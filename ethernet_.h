@@ -19,8 +19,8 @@ typedef struct {
     EnetStatusE (*get_rx_frame_size)(uint32_t*);
     EnetStatusE (*read_rx_frame)(uint8_t*, uint32_t);
 	int (*send_tx_frame)(uint8_t*, uint32_t);
-	void (*set_push_rx_frame_function)(int (*)(uint8_t*, uint32_t));
-	void (*set_pull_tx_frame_function)(int (*)(uint8_t*, uint32_t));
+	void (*register_rx_irq_cb)(int (*)(uint8_t*, uint32_t));
+	void (*register_tx_irq_cb)(int (*)(uint8_t*, uint32_t));
 	const unsigned int max_frame_size;
 	const char* mac;
 }EthernetIo;

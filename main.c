@@ -65,7 +65,7 @@ int main(void) {
 
     while (1) {
         /* Poll the driver, get any outstanding frames */
-        LwipLoop();
+        //LwipLoop();
     }
 }
 
