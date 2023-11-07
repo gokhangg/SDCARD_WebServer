@@ -313,7 +313,7 @@ err_t ethernetif0_init(struct netif *netif) {
 /*Gateway address configuration*/
 #define GW_ADD0 192
 #define GW_ADD1 168
-#define GW_ADD2 178
+#define GW_ADD2 2
 #define GW_ADD3 249
 
 

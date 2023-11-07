@@ -92,8 +92,3 @@ const EnetOperations* InitEnet() {
     operations->init_ethernet(&ethernet_memio, &enet_settings);
     return operations;
 }
-
-void SysTick_Handler(void) {
-    time_isr();
-}
-

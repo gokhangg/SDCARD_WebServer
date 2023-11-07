@@ -280,7 +280,7 @@
 /*--- End of configuration options ---*/
 typedef unsigned short	WCHAR;
 typedef unsigned int	UINT;
-WCHAR ff_convert (WCHAR wch, UINT dir)
+WCHAR static inline ff_convert (WCHAR wch, UINT dir)
 {
           if (wch < 0x80) {
                     /* ASCII Char */
@@ -291,7 +291,7 @@ WCHAR ff_convert (WCHAR wch, UINT dir)
           return 0;
 }
 
-WCHAR ff_wtoupper (WCHAR wch)
+WCHAR static inline ff_wtoupper (WCHAR wch)
 {
           if (wch < 0x80) {
                     /* ASCII Char */

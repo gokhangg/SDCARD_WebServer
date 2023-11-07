@@ -129,7 +129,10 @@ LinkStatus GetLinkStatus(const uint32_t phy_address) {
 
 static const unsigned char MAC_ADD[6] = { 0x25, 0x25, 0x25, 0x25, 0x25, 0x25 };
 const EnetOperations* GetEnetOperations() {
-    static const EnetOperations ops = {.init_phy = InitPhy, .get_link_status = GetLinkStatus, .init_ethernet = InitEthernet,
+    static const EnetOperations ops = {
+    		.init_phy = InitPhy,
+    		.get_link_status = GetLinkStatus,
+			.init_ethernet = InitEthernet,
     .enet_io = {.get_rx_frame_size = GetRxFrameSize,
     .read_rx_frame = ReadRxFrame,
     .send_tx_frame = SendTxFrame,
@@ -139,3 +142,5 @@ const EnetOperations* GetEnetOperations() {
     .mac = MAC_ADD}};
     return &ops;
 }
+
+
